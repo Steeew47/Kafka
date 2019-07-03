@@ -5,7 +5,7 @@ from matplotlib.pyplot import *
 
 boostrap_server = ['localhost:9092']
 topicName = 'testTopic'
-consumer_timeout_ms = 2000
+consumer_timeout_ms = 10000
 plot_time = []
 
 
