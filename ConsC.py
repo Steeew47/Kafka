@@ -9,39 +9,48 @@ c = Consumer({
     'bootstrap.servers': 'localhost:9092',
     'group.id': 'testTopic',
     'auto.offset.reset': 'latest',
-    'queue.buffering.max.ms': 2,
-    'fetch.wait.max.ms' : 2,
-})
+    'fetch.wait.max.ms' : 1,
+    'metadata.request.timeout.ms' : 1000})
 
-c.subscribe(['testTopic'])
+#fetch.wait.max.ms : 5
+
+def print_assignment(consumer, partitions):
+    print('Assignment:', partitions)
+
+c.subscribe(['testTopic'],on_assign=print_assignment)
 
 m_number = 0
+called = True
 
 
 while True:
-    msg = c.poll(1.0)
+    msg = c.poll(30)
+
 
     if msg is None:
-        print("Waiting for messages...")
-        continue
+        break;
     if msg.error():
         print("Consumer error: {}".format(msg.error()))
         continue
 
-    stop = int(round(time.time() * 1000))
-    m_time = stop - msg.timestamp()[1]
+    if called is True:
+        start = time.time()
+        called = False
+
+    m_time = int(round(time.time() * 1000)) - msg.timestamp()[1]
     #print(m_time)
     latency.append(m_time)
     m_number +=1
 
-    if(msg.value() == b'Stop1'):
-        break
+
 
 
 
 
 print("Average latency : {0}".format(sum(latency)/m_number))
 plt.plot(latency)
+plt.ylabel('Letency : [ms]')
+plt.xlabel('Number of messages')
 plt.show()
 
 
